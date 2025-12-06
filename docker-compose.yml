@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:14-alpine
+    container_name: espresso_postgres
+    environment:
+      POSTGRES_USER: nocodb
+      POSTGRES_PASSWORD: nocodb_senha_123
+      POSTGRES_DB: nocodb_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - espresso_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nocodb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NocoDB - Banco de dados visual
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: espresso_nocodb
+    ports:
+      - "8080:8080"
+    environment:
+      NC_DB: "pg://postgres:5432?u=nocodb&p=nocodb_senha_123&d=nocodb_db"
+      NC_AUTH_JWT_SECRET: "seu_jwt_secret_aleatorio_aqui"
+      NC_PUBLIC_URL: "http://192.168.15.27:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - nocodb_data:/usr/app/data
+    networks:
+      - espresso_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Flask API - Backend com IA
+  api:
+    build: ./api
+    container_name: espresso_api
+    ports:
+      - "5000:5000"
+    environment:
+      NOCODB_URL: "http://nocodb:8080"
+      NOCODB_TOKEN: "${NOCODB_TOKEN}"
+      NOCODB_TABLE_ID: "m078xv9skbc4tmu"
+      FLASK_ENV: "production"
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      nocodb:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - api_logs:/app/logs
+    networks:
+      - espresso_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  nocodb_data:
+    driver: local
+  api_logs:
+    driver: local
+
+networks:
+  espresso_network:
+    driver: bridge

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espresso Vilarins - Sistema Inteligente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: #667eea;
+            transform: scale(1.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="number"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .recommendation-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .recommendation-params {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .param-row:last-child {
+            border-bottom: none;
+        }
+
+        .param-label {
+            opacity: 0.9;
+        }
+
+        .param-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .ai-explanation {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .rating {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            font-size: 2em;
+            margin: 15px 0;
+        }
+
+        .rating span {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rating span:hover,
+        .rating span.active {
+            color: #f39c12;
+            transform: scale(1.2);
+        }
+
+        .extraction-timer {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .extraction-timer h3 {
+            margin-bottom: 15px;
+        }
+
+        .timer-display {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-dot.online {
+            background: #28a745;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>☕ Espresso Vilarins</h1>
+                <div class="subtitle">Sistema Inteligente de Extração</div>
+                <span class="version-badge">v2.0 - AI Powered + Automation</span>
+            </div>
+
+            <!-- Status dos sistemas -->
+            <div class="status-indicator">
+                <span class="status-dot" id="esp32Dot"></span>
+                <span id="esp32Status">ESP32: Verificando...</span>
+                <span style="margin: 0 10px;">|</span>
+                <span class="status-dot" id="flaskDot"></span>
+                <span id="flaskStatus">API: Verificando...</span>
+            </div>
+
+            <!-- Indicador de etapas -->
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+                <div class="step-dot" id="dot3"></div>
+                <div class="step-dot" id="dot4"></div>
+            </div>
+
+            <div id="message" class="message hidden"></div>
+
+            <!-- ETAPA 1: Seleção -->
+            <div id="step1" class="step active">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 1: Seleção</h3>
+
+                <div class="form-group">
+                    <label>Barista *</label>
+                    <select id="barista" required>
+                        <option value="">Selecione...</option>
+                        <option value="Paulo Victor">Paulo Victor</option>
+                        <option value="Juliana">Juliana</option>
+                        <option value="Tânia">Tânia</option>
+                        <option value="Pedro Henrique">Pedro Henrique</option>
+                        <option value="Silas">Silas</option>
+                        <option value="Paulo">Paulo</option>
+                        <option value="Concilta">Concilta</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Café *</label>
+                    <select id="cafe" required>
+                        <option value="">Selecione...</option>
+                        <option value="Geisha (Coffee++)">Geisha (Coffee++)</option>
+                        <option value="Bourbon Amarelo (Orfeu)">Bourbon Amarelo (Orfeu)</option>
+                        <option value="Clássico (Orfeu)">Clássico (Orfeu)</option>
+                        <option value="Arara (Coffee++)">Arara (Coffee++)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Moedor *</label>
+                    <select id="moedor" required>
+                        <option value="">Selecione...</option>
+                        <option value="3Bomber R3 (Manual)">3Bomber R3 (Manual)</option>
+                        <option value="Hamilton Beach Plus (Automático)">Hamilton Beach Plus (Automático)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="getRecommendation()">
+                    🤖 Ver Recomendação da IA
+                </button>
+            </div>
+
+            <!-- ETAPA 2: Recomendação -->
+            <div id="step2" class="step">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 2: Recomendação da IA</h3>
+
+                <div class="recommendation-card">
+                    <h3>📊 Setup Recomendado</h3>
+                    
+                    <div class="recommendation-params">
+                        <div class="param-row">
+                            <span class="param-label">Regulagem:</span>
+                            <span class="param-value" id="recRegulagem">--</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-label">Tempo:</span>
+                            <span class="param-value" id="recTempo">--</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-label">Dose In:</span>
+                            <span class="param-value">10g (fixo)</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-label">Massa Out:</span>
+                            <span class="param-value">30g (fixo)</span>
+                        </div>
+                    </div>
+
+                    <div class="ai-explanation" id="aiExplanation">
+                        Analisando histórico...
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="executeExtraction()">
+                    ⚡ Executar Extração Automática
+                </button>
+                <button class="btn btn-secondary" onclick="customExtraction()">
+                    ✏️ Extração Personalizada
+                </button>
+                <button class="btn btn-secondary" onclick="goToStep(1)">
+                    ← Voltar
+                </button>
+            </div>
+
+            <!-- ETAPA 3: Executando -->
+            <div id="step3" class="step">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 3: Extraindo...</h3>
+
+                <div class="extraction-timer">
+                    <h3>⚡ Extração em Andamento</h3>
+                    <div class="timer-display" id="timerDisplay">--</div>
+                    <p>Aguarde o término da extração</p>
+                </div>
+
+                <button class="btn btn-danger" onclick="stopExtractionNow()">
+                    🛑 PARAR EXTRAÇÃO
+                </button>
+            </div>
+
+            <!-- ETAPA 4: Feedback -->
+            <div id="step4" class="step">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 4: Como ficou?</h3>
+
+                <div class="form-group">
+                    <label>Regulagem Utilizada *</label>
+                    <input type="number" id="regulagemUsed" required min="1" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Tempo (segundos)</label>
+                    <input type="number" id="tempoUsed" min="15" max="60">
+                </div>
+
+                <div class="form-group">
+                    <label>Temperatura (°C)</label>
+                    <input type="number" id="temperatura" min="85" max="95">
+                </div>
+
+                <div class="form-group">
+                    <label>Sabor *</label>
+                    <select id="sabor" required>
+                        <option value="">Como ficou?</option>
+                        <option value="Ácido">Ácido</option>
+                        <option value="Amargo">Amargo</option>
+                        <option value="Aguado">Aguado</option>
+                        <option value="Equilibrado">Equilibrado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nota (1-10) *</label>
+                    <div class="rating" id="rating">
+                        <span onclick="setRating(1)">☆</span>
+                        <span onclick="setRating(2)">☆</span>
+                        <span onclick="setRating(3)">☆</span>
+                        <span onclick="setRating(4)">☆</span>
+                        <span onclick="setRating(5)">☆</span>
+                        <span onclick="setRating(6)">☆</span>
+                        <span onclick="setRating(7)">☆</span>
+                        <span onclick="setRating(8)">☆</span>
+                        <span onclick="setRating(9)">☆</span>
+                        <span onclick="setRating(10)">☆</span>
+                    </div>
+                    <input type="hidden" id="nota" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="observacao" rows="3"></textarea>
+                </div>
+
+                <button class="btn btn-success" onclick="saveExtraction()">
+                    💾 Salvar e Finalizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração
+        const ESP32_IP = '192.168.15.50';   // IP FIXO do ESP32 (rede local)
+        const FLASK_API = 'http://192.168.15.27:5000';  // IP local do servidor
+        
+        console.log('🔧 CONFIG:', { ESP32_IP, FLASK_API });
+
+        // Estado
+        let currentStep = 1;
+        let currentRating = 0;
+        let recommendation = null;
+        let selectedBarista = '';
+        let selectedCafe = '';
+        let selectedMoedor = '';
+        let timerInterval = null;
+
+        // Verificar sistemas ao carregar
+        window.addEventListener('DOMContentLoaded', function() {
+            checkSystems();
+            setInterval(checkSystems, 5000);
+        });
+
+        async function checkSystems() {
+            console.log('🔍 Checking systems...');
+            
+            // Verificar ESP32
+            try {
+                console.log('Testing ESP32:', `http://${ESP32_IP}/api/status`);
+                const esp32 = await fetch(`http://${ESP32_IP}/api/status`);
+                if (esp32.ok) {
+                    document.getElementById('esp32Status').textContent = 'ESP32: Online';
+                    document.getElementById('esp32Dot').classList.add('online');
+                    console.log('✅ ESP32 Online');
+                } else {
+                    throw new Error('Offline');
+                }
+            } catch(e) {
+                console.error('❌ ESP32 Error:', e);
+                document.getElementById('esp32Status').textContent = 'ESP32: Offline';
+                document.getElementById('esp32Dot').classList.remove('online');
+            }
+
+            // Verificar Flask
+            try {
+                console.log('Testing Flask:', `${FLASK_API}/api/health`);
+                const flask = await fetch(`${FLASK_API}/api/health`);
+                console.log('Flask response status:', flask.status);
+                if (flask.ok) {
+                    const data = await flask.json();
+                    console.log('Flask response data:', data);
+                    document.getElementById('flaskStatus').textContent = 'API: Online';
+                    document.getElementById('flaskDot').classList.add('online');
+                    console.log('✅ Flask Online');
+                } else {
+                    throw new Error('Offline');
+                }
+            } catch(e) {
+                console.error('❌ Flask Error:', e);
+                document.getElementById('flaskStatus').textContent = 'API: Offline';
+                document.getElementById('flaskDot').classList.remove('online');
+            }
+        }
+
+        // Navegação
+        function goToStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
+            
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`dot${step}`).classList.add('active');
+            
+            currentStep = step;
+        }
+
+        // Etapa 1 → 2: Obter recomendação
+        async function getRecommendation() {
+            selectedBarista = document.getElementById('barista').value;
+            selectedCafe = document.getElementById('cafe').value;
+            selectedMoedor = document.getElementById('moedor').value;
+
+            if (!selectedBarista || !selectedCafe || !selectedMoedor) {
+                showMessage('Por favor, preencha todos os campos', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${FLASK_API}/api/recommendation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        barista: selectedBarista,
+                        cafe: selectedCafe,
+                        moedor: selectedMoedor
+                    })
+                });
+
+                const data = await response.json();
+                
+                // A recomendação vem dentro de data.recomendacao
+                recommendation = data.recomendacao;
+
+                // Mostrar recomendação
+                document.getElementById('recRegulagem').textContent = recommendation.regulagem || '--';
+                document.getElementById('recTempo').textContent = (recommendation.tempo || '--') + 's';
+                document.getElementById('aiExplanation').textContent = recommendation.explicacao || 'Sem histórico anterior. Usando valores padrão.';
+
+                // Pré-preencher campos da etapa 4
+                document.getElementById('regulagemUsed').value = recommendation.regulagem || 45;
+                document.getElementById('tempoUsed').value = recommendation.tempo || 28;
+
+                goToStep(2);
+            } catch(e) {
+                showMessage('Erro ao obter recomendação da IA', 'error');
+                console.error(e);
+            }
+        }
+
+        // Etapa 2 → 3: Executar extração
+        async function executeExtraction() {
+            if (!recommendation || !recommendation.tempo) {
+                showMessage('Erro: Recomendação inválida', 'error');
+                return;
+            }
+            
+            const tempo = recommendation.tempo;
+
+            try {
+                const response = await fetch(`http://${ESP32_IP}/api/start?time=${tempo}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    goToStep(3);
+                    startTimer(tempo);
+                } else {
+                    showMessage('Erro ao iniciar extração: ' + result.error, 'error');
+                }
+            } catch(e) {
+                showMessage('Erro de conexão com ESP32', 'error');
+                console.error(e);
+            }
+        }
+
+        // Extração personalizada
+        function customExtraction() {
+            goToStep(4);
+        }
+
+        // Timer
+        function startTimer(seconds) {
+            let remaining = seconds;
+            document.getElementById('timerDisplay').textContent = remaining + 's';
+
+            timerInterval = setInterval(() => {
+                remaining--;
+                document.getElementById('timerDisplay').textContent = remaining + 's';
+
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    setTimeout(() => goToStep(4), 1000);
+                }
+            }, 1000);
+        }
+
+        async function stopExtractionNow() {
+            if (!confirm('Parar extração?')) return;
+
+            try {
+                await fetch(`http://${ESP32_IP}/api/stop`);
+                clearInterval(timerInterval);
+                goToStep(4);
+            } catch(e) {
+                showMessage('Erro ao parar', 'error');
+            }
+        }
+
+        // Rating
+        function setRating(value) {
+            currentRating = value;
+            document.getElementById('nota').value = value;
+            
+            const stars = document.querySelectorAll('.rating span');
+            stars.forEach((star, index) => {
+                star.textContent = index < value ? '★' : '☆';
+                star.className = index < value ? 'active' : '';
+            });
+        }
+
+        // Salvar
+        async function saveExtraction() {
+            const data = {
+                Barista: selectedBarista,
+                Café: selectedCafe,
+                Moedor: selectedMoedor,
+                Regulagem: parseInt(document.getElementById('regulagemUsed').value),
+                Tempo: parseInt(document.getElementById('tempoUsed').value) || (recommendation ? recommendation.tempo : 28),
+                Temperatura: document.getElementById('temperatura').value ? 
+                    parseInt(document.getElementById('temperatura').value) : null,
+                Sabor: document.getElementById('sabor').value,
+                Nota: currentRating,
+                Observação: document.getElementById('observacao').value
+            };
+
+            if (!data.Sabor || !data.Nota) {
+                showMessage('Por favor, avalie o sabor e dê uma nota', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${FLASK_API}/api/save_extraction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage('✅ Extração salva com sucesso!', 'success');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showMessage('❌ Erro ao salvar: ' + result.error, 'error');
+                }
+            } catch(e) {
+                showMessage('❌ Erro de conexão', 'error');
+                console.error(e);
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.classList.remove('hidden');
+            
+            setTimeout(() => msg.classList.add('hidden'), 5000);
+        }
+    </script>
+</body>
+</html>
+
+
