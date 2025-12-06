@@ -29,7 +29,7 @@ services:
     environment:
       NC_DB: "pg://postgres:5432?u=nocodb&p=nocodb_senha_123&d=nocodb_db"
       NC_AUTH_JWT_SECRET: "seu_jwt_secret_aleatorio_aqui"
-      NC_PUBLIC_URL: "http://192.168.15.27:8080"
+      NC_PUBLIC_URL: "http://192.168.15.4:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,7 +49,7 @@ services:
     build: ./api
     container_name: espresso_api
     ports:
-      - "5000:5000"
+      - "0.0.0.0:5000:5000"
     environment:
       NOCODB_URL: "http://nocodb:8080"
       NOCODB_TOKEN: "${NOCODB_TOKEN}"
