@@ -11,31 +11,45 @@
             box-sizing: border-box;
         }
 
+        /* Paleta de cores inspirada em café */
+        :root {
+            --coffee-dark: #5C3D2E;
+            --coffee-medium: #8B6F47;
+            --coffee-light: #D4A574;
+            --coffee-cream: #F5E6D3;
+            --coffee-white: #FFFFFF;
+            --coffee-accent: #C17A4A;
+            --status-online: #27AE60;
+            --status-offline: #E74C3C;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
             min-height: 100vh;
             padding: 20px;
+            color: var(--coffee-dark);
         }
 
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
         .card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            background: var(--coffee-white);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(92, 61, 46, 0.25);
             margin-bottom: 20px;
-            animation: slideIn 0.5s ease;
+            animation: slideIn 0.6s ease;
+            border: 1px solid rgba(212, 165, 116, 0.2);
         }
 
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateY(-40px);
             }
             to {
                 opacity: 1;
@@ -45,34 +59,41 @@
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid var(--coffee-cream);
         }
 
         .header h1 {
-            color: #2c3e50;
-            font-size: 2em;
-            margin-bottom: 5px;
+            color: var(--coffee-dark);
+            font-size: 2.5em;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            color: #7f8c8d;
-            font-size: 0.9em;
+            color: var(--coffee-medium);
+            font-size: 1em;
+            font-weight: 500;
+            margin-bottom: 12px;
         }
 
         .version-badge {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.75em;
-            font-weight: bold;
-            margin-top: 8px;
+            background: linear-gradient(135deg, var(--coffee-light) 0%, var(--coffee-accent) 100%);
+            color: var(--coffee-white);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(193, 122, 74, 0.2);
         }
 
         .step {
             display: none;
-            animation: fadeIn 0.3s;
+            animation: fadeIn 0.4s ease;
         }
 
         .step.active {
@@ -80,117 +101,178 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(15px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
 
         .step-indicator {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: 15px;
+            margin-bottom: 35px;
+            align-items: center;
         }
 
         .step-dot {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            background: #e0e0e0;
-            transition: all 0.3s;
+            background: var(--coffee-cream);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid var(--coffee-light);
         }
 
         .step-dot.active {
-            background: #667eea;
-            transform: scale(1.3);
+            background: var(--coffee-light);
+            transform: scale(1.4);
+            box-shadow: 0 0 0 6px rgba(212, 165, 116, 0.2);
+            border-color: var(--coffee-accent);
+        }
+
+        .step-dot:not(.active) {
+            opacity: 0.6;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         label {
             display: block;
-            color: #2c3e50;
+            color: var(--coffee-dark);
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            letter-spacing: 0.3px;
         }
 
         select, input[type="number"], textarea {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            padding: 14px 16px;
+            border: 2px solid var(--coffee-cream);
+            border-radius: 12px;
             font-size: 16px;
-            transition: border 0.3s;
+            transition: all 0.3s ease;
+            background: var(--coffee-white);
+            color: var(--coffee-dark);
+            font-family: inherit;
+        }
+
+        select:hover, input:hover, textarea:hover {
+            border-color: var(--coffee-light);
+            background: rgba(245, 230, 211, 0.5);
         }
 
         select:focus, input:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--coffee-accent);
+            box-shadow: 0 0 0 4px rgba(193, 122, 74, 0.1);
+            background: var(--coffee-white);
         }
 
         .btn {
             width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.9em;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--coffee-light) 0%, var(--coffee-accent) 100%);
+            color: var(--coffee-white);
+            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
         }
 
         .btn-secondary {
-            background: #ecf0f1;
-            color: #2c3e50;
+            background: var(--coffee-cream);
+            color: var(--coffee-dark);
+            border: 2px solid var(--coffee-light);
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: var(--coffee-light);
+            color: var(--coffee-white);
+            transform: translateY(-2px);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
-            color: white;
+            background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);
+            color: var(--coffee-white);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.4);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+            color: var(--coffee-white);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
         }
 
         .recommendation-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px;
-            border-radius: 15px;
-            color: white;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            padding: 30px;
+            border-radius: 18px;
+            color: var(--coffee-white);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(92, 61, 46, 0.2);
+            border: 1px solid rgba(212, 165, 116, 0.2);
         }
 
         .recommendation-card h3 {
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .recommendation-params {
-            background: rgba(255,255,255,0.15);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .param-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            align-items: center;
         }
 
         .param-row:last-child {
@@ -198,81 +280,80 @@
         }
 
         .param-label {
-            opacity: 0.9;
+            opacity: 0.95;
+            font-weight: 500;
         }
 
         .param-value {
-            font-weight: bold;
-            font-size: 1.1em;
+            font-weight: 700;
+            font-size: 1.15em;
+            color: var(--coffee-light);
         }
 
         .ai-explanation {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 18px;
+            border-radius: 12px;
             font-size: 0.95em;
-            line-height: 1.6;
+            line-height: 1.7;
+            border-left: 4px solid var(--coffee-light);
         }
 
         .rating {
             display: flex;
-            gap: 5px;
+            gap: 8px;
             justify-content: center;
-            font-size: 2em;
-            margin: 15px 0;
+            font-size: 2.5em;
+            margin: 20px 0;
         }
 
         .rating span {
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
-        .rating span:hover,
+        .rating span:hover {
+            transform: scale(1.25);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
         .rating span.active {
-            color: #f39c12;
+            color: var(--coffee-light);
             transform: scale(1.2);
         }
 
-        .extraction-timer {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .extraction-timer h3 {
-            margin-bottom: 15px;
-        }
-
-        .timer-display {
-            font-size: 4em;
-            font-weight: bold;
-            margin: 20px 0;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
-        }
-
         .message {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
             text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message.success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(39, 174, 96, 0.15);
+            color: #27AE60;
+            border-color: #27AE60;
         }
 
         .message.error {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(231, 76, 60, 0.15);
+            color: #E74C3C;
+            border-color: #E74C3C;
         }
 
         .hidden {
@@ -283,29 +364,188 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--coffee-cream) 0%, rgba(245, 230, 211, 0.7) 100%);
+            border-radius: 12px;
+            margin-bottom: 24px;
             font-size: 0.9em;
+            font-weight: 600;
+            border: 1px solid var(--coffee-light);
         }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: #dc3545;
+            background: var(--status-offline);
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
         }
 
         .status-dot.online {
-            background: #28a745;
-            animation: blink 2s ease-in-out infinite;
+            background: var(--status-online);
+            animation: pulse-green 2s ease-in-out infinite;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
         }
 
-        @keyframes blink {
+        @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .temp-card {
+            background: linear-gradient(135deg, var(--coffee-medium) 0%, var(--coffee-accent) 100%);
+            padding: 28px;
+            border-radius: 18px;
+            color: var(--coffee-white);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(139, 111, 71, 0.25);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+        }
+
+        .temp-card h3 {
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .temp-display {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+
+        .temp-item {
+            text-align: center;
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .temp-label {
+            font-size: 0.85em;
+            opacity: 0.95;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .temp-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--coffee-light);
+        }
+
+        .temp-target {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--coffee-light);
+        }
+
+        .temp-status {
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+
+        .manual-note {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.15) 0%, rgba(193, 122, 74, 0.1) 100%);
+            border-left: 4px solid var(--coffee-light);
+            padding: 18px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .manual-note strong {
+            color: var(--coffee-dark);
+            font-weight: 700;
+        }
+
+        .extraction-timer {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--coffee-cream) 0%, rgba(245, 230, 211, 0.7) 100%);
+            border-radius: 15px;
+            margin-bottom: 24px;
+            border: 2px solid var(--coffee-light);
+        }
+
+        .extraction-timer h3 {
+            color: var(--coffee-dark);
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .timer-display {
+            font-size: 4em;
+            font-weight: 700;
+            color: var(--coffee-accent);
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .extraction-timer p {
+            color: var(--coffee-medium);
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        h3 {
+            color: var(--coffee-dark);
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.2em;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .card {
+                padding: 25px;
+                border-radius: 20px;
+            }
+
+            .header {
+                margin-bottom: 25px;
+                padding-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .temp-display {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .temp-item {
+                width: 100%;
+            }
+
+            .timer-display {
+                font-size: 3em;
+            }
+
+            .rating {
+                font-size: 2em;
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -315,16 +555,35 @@
             <div class="header">
                 <h1>☕ Espresso Vilarins</h1>
                 <div class="subtitle">Sistema Inteligente de Extração</div>
-                <span class="version-badge">v2.0 - AI Powered + Automation</span>
+                <span class="version-badge">v3.0 - AI + Temperature Control</span>
             </div>
 
             <!-- Status dos sistemas -->
             <div class="status-indicator">
                 <span class="status-dot" id="esp32Dot"></span>
                 <span id="esp32Status">ESP32: Verificando...</span>
-                <span style="margin: 0 10px;">|</span>
+                <span style="margin: 0 10px; opacity: 0.5;">|</span>
                 <span class="status-dot" id="flaskDot"></span>
                 <span id="flaskStatus">API: Verificando...</span>
+            </div>
+
+            <!-- Seção de Temperatura -->
+            <div class="temp-card">
+                <h3>🌡️ Temperatura da Caldeira</h3>
+                <div class="temp-display">
+                    <div class="temp-item">
+                        <div class="temp-label">Atual</div>
+                        <div class="temp-value" id="current-temp">--°C</div>
+                    </div>
+                    <div class="temp-item">
+                        <div class="temp-label">Alvo</div>
+                        <div class="temp-target" id="target-temp">93.0°C</div>
+                    </div>
+                    <div class="temp-item">
+                        <div class="temp-label">Status</div>
+                        <div class="temp-status" id="ssr-status">--</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Indicador de etapas -->
@@ -339,7 +598,7 @@
 
             <!-- ETAPA 1: Seleção -->
             <div id="step1" class="step active">
-                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 1: Seleção</h3>
+                <h3>Etapa 1: Seleção</h3>
 
                 <div class="form-group">
                     <label>Barista *</label>
@@ -382,7 +641,7 @@
 
             <!-- ETAPA 2: Recomendação -->
             <div id="step2" class="step">
-                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 2: Recomendação da IA</h3>
+                <h3>Etapa 2: Recomendação da IA</h3>
 
                 <div class="recommendation-card">
                     <h3>📊 Setup Recomendado</h3>
@@ -411,20 +670,22 @@
                     </div>
                 </div>
 
+                <div class="manual-note">
+                    <strong>📝 Instruções:</strong><br>
+                    Configure sua extração com os parâmetros acima e clique no botão abaixo para iniciar.
+                </div>
+
                 <button class="btn btn-success" onclick="executeExtraction()">
-                    ⚡ Executar Extração Automática
-                </button>
-                <button class="btn btn-secondary" onclick="customExtraction()">
-                    ✏️ Extração Personalizada
+                    ⚡ Iniciar Extração
                 </button>
                 <button class="btn btn-secondary" onclick="goToStep(1)">
                     ← Voltar
                 </button>
             </div>
 
-            <!-- ETAPA 3: Executando -->
+            <!-- ETAPA 3: Timer de Extração -->
             <div id="step3" class="step">
-                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 3: Extraindo...</h3>
+                <h3>Etapa 3: Extraindo...</h3>
 
                 <div class="extraction-timer">
                     <h3>⚡ Extração em Andamento</h3>
@@ -432,14 +693,14 @@
                     <p>Aguarde o término da extração</p>
                 </div>
 
-                <button class="btn btn-danger" onclick="stopExtractionNow()">
-                    🛑 PARAR EXTRAÇÃO
+                <button class="btn btn-danger" onclick="skipToFeedback()">
+                    ⏩ Pular para Avaliação
                 </button>
             </div>
 
             <!-- ETAPA 4: Feedback -->
             <div id="step4" class="step">
-                <h3 style="color: #2c3e50; margin-bottom: 20px;">Etapa 4: Como ficou?</h3>
+                <h3>Etapa 4: Como ficou?</h3>
 
                 <div class="form-group">
                     <label>Regulagem Utilizada *</label>
@@ -492,74 +753,109 @@
                 <button class="btn btn-success" onclick="saveExtraction()">
                     💾 Salvar e Finalizar
                 </button>
+                <button class="btn btn-secondary" onclick="goToStep(2)">
+                    ← Voltar
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração
-        const ESP32_IP = '192.168.15.50';   // IP FIXO do ESP32 (rede local)
-        const FLASK_API = 'http://192.168.15.4:5000';  // IP local do servidor
+        // ========================================
+        // CONFIGURAÇÃO
+        // ========================================
+        const FLASK_API = 'http://192.168.15.4:5000';
         
-        console.log('🔧 CONFIG:', { ESP32_IP, FLASK_API });
+        console.log('🔧 CONFIG:', { FLASK_API });
 
-        // Estado
+        // ========================================
+        // ESTADO
+        // ========================================
         let currentStep = 1;
         let currentRating = 0;
         let recommendation = null;
         let selectedBarista = '';
         let selectedCafe = '';
         let selectedMoedor = '';
-        let timerInterval = null;
 
-        // Verificar sistemas ao carregar
+        // ========================================
+        // VERIFICAÇÃO DE SISTEMAS
+        // ========================================
         window.addEventListener('DOMContentLoaded', function() {
             checkSystems();
+            getTemperatureStatus();
             setInterval(checkSystems, 5000);
+            setInterval(getTemperatureStatus, 3000);
         });
 
         async function checkSystems() {
-            console.log('🔍 Checking systems...');
-            
-            // Verificar ESP32
+            // Verificar Flask
             try {
-                console.log('Testing ESP32:', `http://${ESP32_IP}/api/status`);
-                const esp32 = await fetch(`http://${ESP32_IP}/api/status`);
-                if (esp32.ok) {
+                const flask = await fetch(`${FLASK_API}/api/health`, { signal: AbortSignal.timeout(2000) });
+                if (flask.ok) {
+                    document.getElementById('flaskStatus').textContent = 'API: Online';
+                    document.getElementById('flaskDot').classList.add('online');
+                    
+                    // Se Flask está online, ESP32 status vem da temperatura
                     document.getElementById('esp32Status').textContent = 'ESP32: Online';
                     document.getElementById('esp32Dot').classList.add('online');
-                    console.log('✅ ESP32 Online');
                 } else {
                     throw new Error('Offline');
                 }
             } catch(e) {
-                console.error('❌ ESP32 Error:', e);
+                document.getElementById('flaskStatus').textContent = 'API: Offline';
+                document.getElementById('flaskDot').classList.remove('online');
                 document.getElementById('esp32Status').textContent = 'ESP32: Offline';
                 document.getElementById('esp32Dot').classList.remove('online');
             }
+        }
 
-            // Verificar Flask
+        // ========================================
+        // MONITORAMENTO DE TEMPERATURA
+        // ========================================
+        async function getTemperatureStatus() {
             try {
-                console.log('Testing Flask:', `${FLASK_API}/api/health`);
-                const flask = await fetch(`${FLASK_API}/api/health`);
-                console.log('Flask response status:', flask.status);
-                if (flask.ok) {
-                    const data = await flask.json();
-                    console.log('Flask response data:', data);
-                    document.getElementById('flaskStatus').textContent = 'API: Online';
-                    document.getElementById('flaskDot').classList.add('online');
-                    console.log('✅ Flask Online');
-                } else {
-                    throw new Error('Offline');
+                const response = await fetch(`${FLASK_API}/api/temperature/status`, { 
+                    signal: AbortSignal.timeout(2000) 
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateTemperatureDisplay(data);
                 }
-            } catch(e) {
-                console.error('❌ Flask Error:', e);
-                document.getElementById('flaskStatus').textContent = 'API: Offline';
-                document.getElementById('flaskDot').classList.remove('online');
+            } catch (error) {
+                console.error('Erro ao obter temperatura:', error);
+                document.getElementById('current-temp').textContent = '--°C';
+                document.getElementById('ssr-status').textContent = '--';
             }
         }
 
-        // Navegação
+        function updateTemperatureDisplay(data) {
+            const tempElement = document.getElementById('current-temp');
+            const ssrElement = document.getElementById('ssr-status');
+            
+            if (data.online && data.temperature > 0) {
+                tempElement.textContent = `${data.temperature.toFixed(1)}°C`;
+                
+                if (data.temperature > data.target + 2) {
+                    tempElement.style.color = '#E74C3C';
+                } else if (data.temperature < data.target - 2) {
+                    tempElement.style.color = '#3498DB';
+                } else {
+                    tempElement.style.color = '#F5E6D3';
+                }
+                
+                ssrElement.textContent = data.ssr_state ? '🔥 AQUECENDO' : '❄️ ESTÁVEL';
+            } else {
+                tempElement.textContent = '--°C';
+                tempElement.style.color = '#95a5a6';
+                ssrElement.textContent = 'Offline';
+            }
+        }
+
+        // ========================================
+        // NAVEGAÇÃO
+        // ========================================
         function goToStep(step) {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
@@ -570,7 +866,9 @@
             currentStep = step;
         }
 
-        // Etapa 1 → 2: Obter recomendação
+        // ========================================
+        // ETAPA 1 → 2: RECOMENDAÇÃO
+        // ========================================
         async function getRecommendation() {
             selectedBarista = document.getElementById('barista').value;
             selectedCafe = document.getElementById('cafe').value;
@@ -593,16 +891,13 @@
                 });
 
                 const data = await response.json();
-                
-                // A recomendação vem dentro de data.recomendacao
                 recommendation = data.recomendacao;
 
-                // Mostrar recomendação
                 document.getElementById('recRegulagem').textContent = recommendation.regulagem || '--';
                 document.getElementById('recTempo').textContent = (recommendation.tempo || '--') + 's';
-                document.getElementById('aiExplanation').textContent = recommendation.explicacao || 'Sem histórico anterior. Usando valores padrão.';
+                document.getElementById('aiExplanation').textContent = recommendation.explicacao || 'Sem histórico anterior.';
 
-                // Pré-preencher campos da etapa 4
+                // Pré-preencher etapa 3
                 document.getElementById('regulagemUsed').value = recommendation.regulagem || 45;
                 document.getElementById('tempoUsed').value = recommendation.tempo || 28;
 
@@ -613,34 +908,18 @@
             }
         }
 
-        // Etapa 2 → 3: Executar extração
-        async function executeExtraction() {
+        // ========================================
+        // ETAPA 2 → 3: EXECUTAR EXTRAÇÃO
+        // ========================================
+        function executeExtraction() {
             if (!recommendation || !recommendation.tempo) {
                 showMessage('Erro: Recomendação inválida', 'error');
                 return;
             }
             
             const tempo = recommendation.tempo;
-
-            try {
-                const response = await fetch(`http://${ESP32_IP}/api/start?time=${tempo}`);
-                const result = await response.json();
-
-                if (result.success) {
-                    goToStep(3);
-                    startTimer(tempo);
-                } else {
-                    showMessage('Erro ao iniciar extração: ' + result.error, 'error');
-                }
-            } catch(e) {
-                showMessage('Erro de conexão com ESP32', 'error');
-                console.error(e);
-            }
-        }
-
-        // Extração personalizada
-        function customExtraction() {
-            goToStep(4);
+            goToStep(3);
+            startTimer(tempo);
         }
 
         // Timer
@@ -659,19 +938,16 @@
             }, 1000);
         }
 
-        async function stopExtractionNow() {
-            if (!confirm('Parar extração?')) return;
-
-            try {
-                await fetch(`http://${ESP32_IP}/api/stop`);
+        function skipToFeedback() {
+            if (timerInterval) {
                 clearInterval(timerInterval);
-                goToStep(4);
-            } catch(e) {
-                showMessage('Erro ao parar', 'error');
             }
+            goToStep(4);
         }
 
-        // Rating
+        // ========================================
+        // ETAPA 4: RATING E SALVAR
+        // ========================================
         function setRating(value) {
             currentRating = value;
             document.getElementById('nota').value = value;
@@ -683,7 +959,6 @@
             });
         }
 
-        // Salvar
         async function saveExtraction() {
             const data = {
                 Barista: selectedBarista,
@@ -735,5 +1010,3 @@
     </script>
 </body>
 </html>
-
-

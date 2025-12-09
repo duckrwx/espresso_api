@@ -12,12 +12,22 @@ NOCODB_URL = os.getenv("NOCODB_URL", "http://nocodb:8080")
 API_TOKEN = os.getenv("NOCODB_TOKEN", os.getenv("API_TOKEN", "oq5N9NzQUPSefhQeB6Bhv1mEX5bVMqpLO4nLTQfT"))
 TABLE_ID = os.getenv("NOCODB_TABLE_ID", os.getenv("TABLE_ID", "m078xv9skbc4tmu"))
 
-# ESP32 Configuration (opcional via env)
+# ESP32 Configuration
 ESP32_IP = os.getenv("ESP32_IP", "192.168.15.50")
 
 HEADERS = {"Content-Type": "application/json"}
 if API_TOKEN:
     HEADERS["xc-token"] = API_TOKEN
+
+# Variável global para armazenar última temperatura recebida do ESP32
+latest_temperature_data = {
+    "temperature": 0,
+    "target": 93.0,
+    "ssr_state": False,
+    "status": "waiting",
+    "timestamp": None,
+    "online": False
+}
 
 def get_last_extraction(barista, cafe, moedor):
     """Busca a última extração de um barista específico com um café específico"""
@@ -238,6 +248,84 @@ def health_check():
         "status": "online",
         "timestamp": datetime.now().isoformat()
     })
+
+# ========================================
+# ENDPOINTS DE TEMPERATURA
+# ========================================
+
+@app.route('/api/temperature', methods=['POST'])
+def receive_temperature():
+    """Receber dados de temperatura do ESP32 (OPCIONAL - ESP32 pode enviar)"""
+    global latest_temperature_data
+    
+    try:
+        data = request.json
+        
+        # Atualizar dados globais
+        latest_temperature_data = {
+            "temperature": data.get('temperature', 0),
+            "target": data.get('target', 93.0),
+            "ssr_state": data.get('ssr_state', False),
+            "status": data.get('status', 'normal'),
+            "timestamp": datetime.now().isoformat(),
+            "online": True
+        }
+        
+        print(f"📡 Temp recebida do ESP32: {latest_temperature_data['temperature']}°C | SSR: {'ON' if latest_temperature_data['ssr_state'] else 'OFF'}")
+        
+        return jsonify({
+            "success": True,
+            "message": "Dados recebidos"
+        })
+        
+    except Exception as e:
+        print(f"Erro ao receber temperatura: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/temperature/status', methods=['GET'])
+def get_temperature_status():
+    """Interface consulta temperatura - PROXY para ESP32"""
+    try:
+        # Consultar ESP32 diretamente!
+        response = requests.get(f"http://{ESP32_IP}/api/temperature", timeout=2)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Atualizar cache local
+            latest_temperature_data.update({
+                "temperature": data.get('temperature', 0),
+                "target": data.get('target', 93.0),
+                "ssr_state": data.get('ssr_state', False),
+                "status": data.get('status', 'normal'),
+                "timestamp": datetime.now().isoformat(),
+                "online": True
+            })
+            
+            return jsonify(latest_temperature_data)
+        else:
+            # ESP32 offline
+            return jsonify({
+                "temperature": 0,
+                "target": 93.0,
+                "ssr_state": False,
+                "status": "esp32_offline",
+                "timestamp": datetime.now().isoformat(),
+                "online": False
+            })
+            
+    except Exception as e:
+        print(f"Erro ao consultar ESP32: {e}")
+        # Retornar dados em cache ou offline
+        return jsonify({
+            "temperature": latest_temperature_data.get('temperature', 0),
+            "target": 93.0,
+            "ssr_state": False,
+            "status": "error",
+            "timestamp": datetime.now().isoformat(),
+            "online": False,
+            "error": str(e)
+        })
 
 if __name__ == '__main__':
     # Allow enabling debug via FLASK_DEBUG env var (useful for local dev)
