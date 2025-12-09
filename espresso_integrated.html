@@ -568,20 +568,12 @@
             </div>
 
             <!-- Seção de Temperatura -->
-            <div class="temp-card">
+            <div class="temp-card" id="tempCardInitial">
                 <h3>🌡️ Temperatura da Caldeira</h3>
                 <div class="temp-display">
-                    <div class="temp-item">
-                        <div class="temp-label">Atual</div>
+                    <div class="temp-item" style="margin: 0 auto;">
+                        <div class="temp-label">Temperatura Atual</div>
                         <div class="temp-value" id="current-temp">--°C</div>
-                    </div>
-                    <div class="temp-item">
-                        <div class="temp-label">Alvo</div>
-                        <div class="temp-target" id="target-temp">93.0°C</div>
-                    </div>
-                    <div class="temp-item">
-                        <div class="temp-label">Status</div>
-                        <div class="temp-status" id="ssr-status">--</div>
                     </div>
                 </div>
             </div>
@@ -642,6 +634,25 @@
             <!-- ETAPA 2: Recomendação -->
             <div id="step2" class="step">
                 <h3>Etapa 2: Recomendação da IA</h3>
+
+                <!-- Temperatura Personalizada -->
+                <div class="temp-card" style="margin-bottom: 20px;">
+                    <h3>🌡️ Temperatura Personalizada</h3>
+                    <div class="temp-display">
+                        <div class="temp-item">
+                            <div class="temp-label">Atual</div>
+                            <div class="temp-value" id="current-temp-step2">--°C</div>
+                        </div>
+                        <div class="temp-item">
+                            <div class="temp-label">Alvo Recomendado</div>
+                            <div class="temp-target" id="target-temp-recommended">--°C</div>
+                        </div>
+                        <div class="temp-item">
+                            <div class="temp-label">Status</div>
+                            <div class="temp-status" id="ssr-status-step2">--</div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="recommendation-card">
                     <h3>📊 Setup Recomendado</h3>
@@ -832,24 +843,101 @@
 
         function updateTemperatureDisplay(data) {
             const tempElement = document.getElementById('current-temp');
-            const ssrElement = document.getElementById('ssr-status');
             
-            if (data.online && data.temperature > 0) {
-                tempElement.textContent = `${data.temperature.toFixed(1)}°C`;
-                
-                if (data.temperature > data.target + 2) {
-                    tempElement.style.color = '#E74C3C';
-                } else if (data.temperature < data.target - 2) {
-                    tempElement.style.color = '#3498DB';
+            if (tempElement) {
+                if (data.online && data.temperature > 0) {
+                    tempElement.textContent = `${data.temperature.toFixed(1)}°C`;
+                    
+                    if (data.temperature > data.target + 2) {
+                        tempElement.style.color = '#E74C3C';
+                    } else if (data.temperature < data.target - 2) {
+                        tempElement.style.color = '#3498DB';
+                    } else {
+                        tempElement.style.color = '#27AE60';
+                    }
                 } else {
-                    tempElement.style.color = '#F5E6D3';
+                    tempElement.textContent = '--°C';
+                    tempElement.style.color = '#95a5a6';
                 }
+            }
+        }
+
+        // ========================================
+        // CONTROLE DE TEMPERATURA TARGET
+        // ========================================
+        async function setTemperatureTarget(targetTemp) {
+            try {
+                console.log(`🎯 Enviando temperatura target: ${targetTemp}°C`);
                 
-                ssrElement.textContent = data.ssr_state ? '🔥 AQUECENDO' : '❄️ ESTÁVEL';
-            } else {
-                tempElement.textContent = '--°C';
-                tempElement.style.color = '#95a5a6';
-                ssrElement.textContent = 'Offline';
+                const response = await fetch(`${FLASK_API}/api/temperature/set`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target: targetTemp })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log(`✅ Temperatura configurada no ESP32: ${targetTemp}°C`);
+                } else {
+                    console.error('❌ Erro ao configurar temperatura:', result.error);
+                    showMessage(`Aviso: Não foi possível ajustar temperatura automaticamente`, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao enviar temperatura:', error);
+                // Não bloquear o fluxo se falhar
+            }
+        }
+
+        // ========================================
+        // ATUALIZAÇÃO DE TEMPERATURA NA ETAPA 2
+        // ========================================
+        let tempUpdateInterval = null;
+
+        function startTemperatureUpdateForStep2() {
+            // Limpar intervalo anterior se existir
+            if (tempUpdateInterval) {
+                clearInterval(tempUpdateInterval);
+            }
+
+            // Atualizar imediatamente
+            updateStep2Temperature();
+
+            // Atualizar a cada 3 segundos
+            tempUpdateInterval = setInterval(updateStep2Temperature, 3000);
+        }
+
+        async function updateStep2Temperature() {
+            try {
+                const response = await fetch(`${FLASK_API}/api/temperature/status`, { 
+                    signal: AbortSignal.timeout(2000) 
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Atualizar temperatura atual
+                    const tempElement = document.getElementById('current-temp-step2');
+                    const ssrElement = document.getElementById('ssr-status-step2');
+                    
+                    if (tempElement && data.temperature !== undefined) {
+                        tempElement.textContent = `${data.temperature.toFixed(1)}°C`;
+                        
+                        if (data.temperature > data.target + 2) {
+                            tempElement.style.color = '#E74C3C';
+                        } else if (data.temperature < data.target - 2) {
+                            tempElement.style.color = '#3498DB';
+                        } else {
+                            tempElement.style.color = '#27AE60';
+                        }
+                    }
+                    
+                    if (ssrElement) {
+                        ssrElement.textContent = data.ssr_state ? '🔥 AQUECENDO' : '❄️ ESTÁVEL';
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar temperatura step2:', error);
             }
         }
 
@@ -864,6 +952,12 @@
             document.getElementById(`dot${step}`).classList.add('active');
             
             currentStep = step;
+
+            // Parar atualização de temperatura da etapa 2 quando sair dela
+            if (step !== 2 && tempUpdateInterval) {
+                clearInterval(tempUpdateInterval);
+                tempUpdateInterval = null;
+            }
         }
 
         // ========================================
@@ -897,9 +991,20 @@
                 document.getElementById('recTempo').textContent = (recommendation.tempo || '--') + 's';
                 document.getElementById('aiExplanation').textContent = recommendation.explicacao || 'Sem histórico anterior.';
 
-                // Pré-preencher etapa 3
+                // Exibir temperatura target personalizada
+                const targetTemp = recommendation.temperatura_target || 90.0;
+                document.getElementById('target-temp-recommended').textContent = targetTemp.toFixed(1) + '°C';
+
+                // Pré-preencher etapa 4 (feedback)
                 document.getElementById('regulagemUsed').value = recommendation.regulagem || 45;
                 document.getElementById('tempoUsed').value = recommendation.tempo || 28;
+                document.getElementById('temperatura').value = Math.round(targetTemp);
+
+                // Enviar temperatura target para o ESP32
+                await setTemperatureTarget(targetTemp);
+
+                // Iniciar atualização de temperatura na etapa 2
+                startTemperatureUpdateForStep2();
 
                 goToStep(2);
             } catch(e) {
@@ -973,19 +1078,24 @@
                 Observação: document.getElementById('observacao').value
             };
 
+            console.log('💾 Dados para salvar:', data);
+
             if (!data.Sabor || !data.Nota) {
                 showMessage('Por favor, avalie o sabor e dê uma nota', 'error');
                 return;
             }
 
             try {
+                console.log('🚀 Enviando para:', `${FLASK_API}/api/save_extraction`);
                 const response = await fetch(`${FLASK_API}/api/save_extraction`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
+                console.log('📡 Status da resposta:', response.status);
                 const result = await response.json();
+                console.log('📊 Resultado:', result);
 
                 if (result.success) {
                     showMessage('✅ Extração salva com sucesso!', 'success');

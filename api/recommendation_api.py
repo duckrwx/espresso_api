@@ -22,7 +22,7 @@ if API_TOKEN:
 # Variável global para armazenar última temperatura recebida do ESP32
 latest_temperature_data = {
     "temperature": 0,
-    "target": 93.0,
+    "target": 90.0,
     "ssr_state": False,
     "status": "waiting",
     "timestamp": None,
@@ -83,11 +83,13 @@ def calculate_recommendation(last_extraction, moedor):
         "3Bomber R3 (Manual)": {
             "regulagem": 45,  # Meio da faixa 35-60 para pressurizado
             "tempo": 26,
+            "temperatura_target": 90.0,
             "explicacao": "Setup inicial recomendado para cesto pressurizado"
         },
         "Hamilton Beach Plus (Automático)": {
             "regulagem": 8,  # Ajustar conforme seu moedor
             "tempo": 25,
+            "temperatura_target": 90.0,
             "explicacao": "Setup inicial padrão"
         }
     }
@@ -99,12 +101,14 @@ def calculate_recommendation(last_extraction, moedor):
     # Extrair dados da última extração
     regulagem_atual = last_extraction.get("Regulagem", 45)
     tempo_atual = last_extraction.get("Tempo", 26)
+    temperatura_atual = last_extraction.get("Temperatura", 90.0)
     sabor = last_extraction.get("Sabor", "")
     nota = last_extraction.get("Nota", 0)
     
     # Inicializar recomendação
     nova_regulagem = regulagem_atual
     novo_tempo = tempo_atual
+    nova_temperatura = temperatura_atual if temperatura_atual else 90.0
     explicacao = ""
     
     # Se a nota foi boa (>= 7) e equilibrado, mantém setup
@@ -113,6 +117,7 @@ def calculate_recommendation(last_extraction, moedor):
         return {
             "regulagem": regulagem_atual,
             "tempo": tempo_atual,
+            "temperatura_target": float(nova_temperatura),
             "explicacao": explicacao,
             "ultima_nota": nota
         }
@@ -120,26 +125,33 @@ def calculate_recommendation(last_extraction, moedor):
     # Ajustes baseados no sabor
     if sabor == "Amargo":
         # Moagem mais grossa (número maior) e menos tempo
+        # Reduzir temperatura para menos amargor
         nova_regulagem = regulagem_atual + 5
         novo_tempo = max(20, tempo_atual - 3)
-        explicacao = "Última extração estava amarga. Vamos usar moagem mais grossa e extrair menos tempo."
+        nova_temperatura = max(88.0, nova_temperatura - 1.5)
+        explicacao = "Última extração estava amarga. Vamos usar moagem mais grossa, menos tempo e temperatura mais baixa."
     
     elif sabor == "Aguado":
         # Moagem mais fina (número menor) e mais tempo
+        # Aumentar temperatura para melhor extração
         nova_regulagem = regulagem_atual - 4
         novo_tempo = tempo_atual + 4
-        explicacao = "Última extração estava aguada. Vamos usar moagem mais fina e extrair mais tempo."
+        nova_temperatura = min(95.0, nova_temperatura + 1.0)
+        explicacao = "Última extração estava aguada. Vamos usar moagem mais fina, mais tempo e temperatura mais alta."
     
     elif sabor == "Ácido":
         # Leve ajuste na moagem e mais tempo
+        # Aumentar temperatura para equilibrar acidez
         nova_regulagem = regulagem_atual + 2
         novo_tempo = tempo_atual + 3
-        explicacao = "Última extração estava ácida. Vamos extrair um pouco mais tempo para equilibrar."
+        nova_temperatura = min(95.0, nova_temperatura + 1.5)
+        explicacao = "Última extração estava ácida. Vamos extrair mais tempo com temperatura mais alta para equilibrar."
     
     elif nota < 6:
         # Se nota baixa mas sem feedback específico
         nova_regulagem = regulagem_atual + 3
         novo_tempo = tempo_atual + 2
+        nova_temperatura = min(94.0, nova_temperatura + 0.5)
         explicacao = f"Última nota foi {nota}/10. Vamos ajustar levemente o setup."
     
     # Limites de segurança para 3Bomber R3 com cesto pressurizado
@@ -149,13 +161,18 @@ def calculate_recommendation(last_extraction, moedor):
     # Limites de tempo
     novo_tempo = max(20, min(35, novo_tempo))
     
+    # Limites de temperatura (88°C a 95°C)
+    nova_temperatura = max(88.0, min(95.0, nova_temperatura))
+    
     return {
         "regulagem": int(nova_regulagem),
         "tempo": int(novo_tempo) if tempo_atual else None,
+        "temperatura_target": float(nova_temperatura),
         "explicacao": explicacao,
         "ultima_nota": nota,
         "ultima_regulagem": regulagem_atual,
-        "ultimo_tempo": tempo_atual if tempo_atual else "Não registrado"
+        "ultimo_tempo": tempo_atual if tempo_atual else "Não registrado",
+        "ultima_temperatura": temperatura_atual if temperatura_atual else "Não registrado"
     }
 
 @app.route('/api/recommendation', methods=['POST'])
@@ -197,11 +214,14 @@ def save_extraction():
     """Salvar dados de extração no NocoDB"""
     try:
         data = request.json
+        print(f"\n💾 RECEBENDO DADOS PARA SALVAR:")
+        print(f"   Dados recebidos: {data}")
         
         # Validar dados obrigatórios
         required_fields = ['Barista', 'Café', 'Moedor', 'Regulagem', 'Tempo', 'Sabor', 'Nota']
         for field in required_fields:
             if field not in data:
+                print(f"   ❌ Campo faltando: {field}")
                 return jsonify({"error": f"Campo obrigatório: {field}"}), 400
         
         # Preparar dados para NocoDB
@@ -220,17 +240,26 @@ def save_extraction():
             "Observação": data.get('Observação', '')
         }
         
+        print(f"   Dados preparados para NocoDB: {extraction_data}")
+        
         # Salvar no NocoDB
         url = f"{NOCODB_URL}/api/v2/tables/{TABLE_ID}/records"
+        print(f"   URL NocoDB: {url}")
+        print(f"   Table ID: {TABLE_ID}")
+        
         response = requests.post(url, headers=HEADERS, json=extraction_data)
+        print(f"   Status Code NocoDB: {response.status_code}")
+        print(f"   Resposta NocoDB: {response.text[:200]}...")
         
         if response.status_code == 200:
+            print(f"   ✅ Extração salva com sucesso!")
             return jsonify({
                 "success": True,
                 "message": "Extração salva com sucesso",
                 "data": response.json()
             })
         else:
+            print(f"   ❌ Erro ao salvar no NocoDB")
             return jsonify({
                 "success": False,
                 "error": "Erro ao salvar no NocoDB",
@@ -238,8 +267,10 @@ def save_extraction():
             }), 500
             
     except Exception as e:
-        print(f"Erro ao salvar extração: {e}")
-        return jsonify({"error": str(e)}), 500
+        print(f"❌ Erro ao salvar extração: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -264,7 +295,7 @@ def receive_temperature():
         # Atualizar dados globais
         latest_temperature_data = {
             "temperature": data.get('temperature', 0),
-            "target": data.get('target', 93.0),
+            "target": data.get('target', 90.0),
             "ssr_state": data.get('ssr_state', False),
             "status": data.get('status', 'normal'),
             "timestamp": datetime.now().isoformat(),
@@ -295,7 +326,7 @@ def get_temperature_status():
             # Atualizar cache local
             latest_temperature_data.update({
                 "temperature": data.get('temperature', 0),
-                "target": data.get('target', 93.0),
+                "target": data.get('target', 90.0),
                 "ssr_state": data.get('ssr_state', False),
                 "status": data.get('status', 'normal'),
                 "timestamp": datetime.now().isoformat(),
@@ -307,7 +338,7 @@ def get_temperature_status():
             # ESP32 offline
             return jsonify({
                 "temperature": 0,
-                "target": 93.0,
+                "target": 90.0,
                 "ssr_state": False,
                 "status": "esp32_offline",
                 "timestamp": datetime.now().isoformat(),
@@ -319,13 +350,60 @@ def get_temperature_status():
         # Retornar dados em cache ou offline
         return jsonify({
             "temperature": latest_temperature_data.get('temperature', 0),
-            "target": 93.0,
+            "target": 90.0,
             "ssr_state": False,
             "status": "error",
             "timestamp": datetime.now().isoformat(),
             "online": False,
             "error": str(e)
         })
+
+@app.route('/api/temperature/set', methods=['POST'])
+def set_temperature_target():
+    """Enviar temperatura target personalizada para o ESP32"""
+    try:
+        data = request.json
+        target_temp = data.get('target')
+        
+        if not target_temp:
+            return jsonify({"error": "Missing 'target' parameter"}), 400
+        
+        # Validar limites
+        if target_temp < 88.0 or target_temp > 95.0:
+            return jsonify({"error": "Temperature must be between 88°C and 95°C"}), 400
+        
+        # Enviar para ESP32
+        response = requests.post(
+            f"http://{ESP32_IP}/api/temperature/set",
+            json={"target": target_temp},
+            timeout=5
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"🎯 Temperatura target enviada ao ESP32: {target_temp}°C")
+            return jsonify({
+                "success": True,
+                "target": target_temp,
+                "esp32_response": result
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "ESP32 rejected temperature",
+                "details": response.text
+            }), 500
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao enviar temperatura ao ESP32: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to communicate with ESP32",
+            "details": str(e)
+        }), 500
+    except Exception as e:
+        print(f"Erro ao processar temperatura: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     # Allow enabling debug via FLASK_DEBUG env var (useful for local dev)

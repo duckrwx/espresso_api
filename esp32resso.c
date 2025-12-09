@@ -37,9 +37,10 @@ const int LED_PIN = 2;
 // ========================================
 // CONTROLE TEMPERATURA
 // ========================================
-const float TARGET_TEMP = 93.0;
+float TARGET_TEMP = 90.0;  // Agora é variável - pode ser alterada via API
 const float HYSTERESIS = 2.0;
 const float TEMP_MAX = 105.0;
+const float TEMP_MIN = 88.0;
 
 // ========================================
 // OBJETOS
@@ -243,6 +244,67 @@ void setupWebServer() {
         String response;
         serializeJson(doc, response);
         server.send(200, "application/json", response);
+    });
+    
+    // OPTIONS para /api/temperature/set
+    server.on("/api/temperature/set", HTTP_OPTIONS, []() {
+        sendCORS();
+        server.send(204);
+    });
+    
+    // POST - Alterar temperatura target
+    server.on("/api/temperature/set", HTTP_POST, []() {
+        sendCORS();
+        
+        if (server.hasArg("plain")) {
+            StaticJsonDocument<200> doc;
+            DeserializationError error = deserializeJson(doc, server.arg("plain"));
+            
+            if (error) {
+                server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+                return;
+            }
+            
+            if (doc.containsKey("target")) {
+                float newTarget = doc["target"];
+                
+                // Validar limites de segurança
+                if (newTarget < TEMP_MIN || newTarget > TEMP_MAX) {
+                    String errorMsg = "{\"error\":\"Temperature out of range. Must be between ";
+                    errorMsg += String(TEMP_MIN, 1);
+                    errorMsg += "°C and ";
+                    errorMsg += String(TEMP_MAX, 1);
+                    errorMsg += "°C\"}";
+                    server.send(400, "application/json", errorMsg);
+                    return;
+                }
+                
+                TARGET_TEMP = newTarget;
+                
+                Serial.println("\n🎯 NOVA TEMPERATURA TARGET RECEBIDA!");
+                Serial.print("   Temperatura anterior: ");
+                Serial.println(TARGET_TEMP, 1);
+                Serial.print("   Nova temperatura: ");
+                Serial.print(newTarget, 1);
+                Serial.println("°C");
+                
+                StaticJsonDocument<200> responseDoc;
+                responseDoc["success"] = true;
+                responseDoc["target"] = TARGET_TEMP;
+                responseDoc["current"] = currentTemp;
+                responseDoc["message"] = "Temperature target updated";
+                
+                String response;
+                serializeJson(responseDoc, response);
+                server.send(200, "application/json", response);
+                
+                blinkLED(3);
+            } else {
+                server.send(400, "application/json", "{\"error\":\"Missing 'target' parameter\"}");
+            }
+        } else {
+            server.send(400, "application/json", "{\"error\":\"No body provided\"}");
+        }
     });
     
     server.begin();
